@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>选必一默写本</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F3F4F1; --surface:#FFFFFF; --surface2:#E9EBE6; --line:#D4D7D0;
+  --ink:#1C2230; --muted:#67707F; --faint:#9AA1AD;
+  --accent:#27467F; --accent-ink:#FFFFFF; --accent-soft:#E3E9F5;
+  --ok:#2C7A4B; --ok-soft:#DFF0E4; --bad:#B8322A; --bad-soft:#F6E1DE;
+  --star:#8A6A1F; --star-soft:#F4EBD3;
+  --serif:"Source Serif 4","Songti SC","Noto Serif SC",Georgia,serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181E; --surface:#1E222A; --surface2:#262B34; --line:#343A45;
+    --ink:#ECEEF2; --muted:#A3AAB6; --faint:#6B7380;
+    --accent:#8FA9E6; --accent-ink:#0F172A; --accent-soft:#263252;
+    --ok:#6CC28E; --ok-soft:#1F3A2B; --bad:#E5847A; --bad-soft:#452522;
+    --star:#D9B45C; --star-soft:#3B321C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181E; --surface:#1E222A; --surface2:#262B34; --line:#343A45;
+  --ink:#ECEEF2; --muted:#A3AAB6; --faint:#6B7380;
+  --accent:#8FA9E6; --accent-ink:#0F172A; --accent-soft:#263252;
+  --ok:#6CC28E; --ok-soft:#1F3A2B; --bad:#E5847A; --bad-soft:#452522;
+  --star:#D9B45C; --star-soft:#3B321C;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:14px 40px}
+header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+header.top h1{font-family:var(--serif);font-weight:600;font-size:22px;margin:0;letter-spacing:.01em}
+header.top h1 small{font-family:var(--sans);font-weight:400;font-size:13px;color:var(--muted);margin-left:8px}
+nav.tabs{display:flex;gap:4px;background:var(--surface2);padding:4px;border-radius:12px;flex-wrap:wrap}
+nav.tabs button{border:0;background:transparent;padding:7px 14px;border-radius:8px;color:var(--muted);font-weight:500}
+nav.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.panel+.panel{margin-top:14px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px;font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--surface);user-select:none}
+.chip input{accent-color:var(--accent);margin:0}
+.chip .n{color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:9px 16px;font-weight:500}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.big{padding:13px 22px;font-size:16px}
+.btn.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.btn.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.kbd{display:inline-block;font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;margin-left:6px;color:var(--muted);background:var(--surface2);font-family:ui-monospace,Menlo,monospace}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:12px}
+.stat{background:var(--surface2);border-radius:var(--r);padding:10px 12px}
+.stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums;font-weight:600;line-height:1.2}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.good b{color:var(--ok)} .stat.warn b{color:var(--bad)}
+.bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+.note{font-size:13px;color:var(--muted);margin:8px 0 0}
+/* card */
+.card{text-align:center;padding:36px 16px 28px;min-height:260px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px}
+.card .pos{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:16px}
+.card .zh{font-size:28px;font-weight:500;line-height:1.35;text-wrap:balance;max-width:26ch}
+.card .meta{font-size:12px;color:var(--faint);letter-spacing:.06em}
+.card .en{font-family:var(--serif);font-size:40px;font-weight:600;line-height:1.15;letter-spacing:.005em;margin-top:6px}
+.card .en.hidden-word{color:transparent;text-shadow:none;letter-spacing:.35em;font-family:ui-monospace,monospace;font-size:22px;border-bottom:2px dashed var(--line);color:var(--faint)}
+.card .hint{font-family:var(--serif);color:var(--faint);font-size:22px;letter-spacing:.2em}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--star-soft);color:var(--star);font-weight:600;vertical-align:middle}
+.tag.u{background:var(--accent-soft);color:var(--accent)}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.actions .btn{min-width:150px}
+.progress-line{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+/* list */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em;position:sticky;top:0;background:var(--surface)}
+td.en{font-family:var(--serif);font-size:16px;font-weight:600;white-space:nowrap}
+td.num{color:var(--faint);font-variant-numeric:tabular-nums;width:2.5em}
+td.st{white-space:nowrap;font-size:12px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--faint)}
+.dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.mid{background:var(--star)}
+.tablewrap{overflow-x:auto;margin-top:8px;max-height:70vh;overflow-y:auto;border:1px solid var(--line);border-radius:var(--r)}
+.result-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px}
+.result-list div{background:var(--bad-soft);border-radius:8px;padding:8px 12px;font-size:14px}
+.result-list div b{font-family:var(--serif);font-size:16px;color:var(--bad);display:block}
+.empty{color:var(--muted);text-align:center;padding:40px 10px}
+.field{display:flex;align-items:center;gap:8px;font-size:14px}
+.field select,.field input[type=number]{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:auto}
+/* print sheet */
+#sheet{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  .wrap{display:none}
+  #sheet{display:block;font-family:var(--sans);color:#000;padding:0;font-size:13px}
+  .sheet-page{page-break-after:always;padding:10mm 12mm}
+  .sheet-page:last-child{page-break-after:auto}
+  .sheet-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #000;padding-bottom:4mm;margin-bottom:5mm}
+  .sheet-head h3{margin:0;font-size:16px}
+  .sheet-head span{font-size:12px}
+  .sheet-cols{display:grid;grid-template-columns:1fr 1fr;column-gap:10mm}
+  .sheet-row{display:grid;grid-template-columns:2em 1fr;gap:4px;border-bottom:1px solid #000;min-height:9.5mm;padding:2mm 0 1mm;align-items:end}
+  .sheet-row .zh{font-size:12.5px;line-height:1.3;color:#000}
+  .sheet-row .zh i{font-style:italic;color:#444;margin-right:4px}
+  .sheet-row .n{color:#666;font-size:11px}
+  .key-row{display:grid;grid-template-columns:2em 1fr 1fr;gap:6px;padding:1.2mm 0;border-bottom:1px dotted #999;font-size:12px}
+  .key-row .en{font-family:var(--serif);font-weight:600;font-size:13px}
+}
+
+/* writing */
+.w-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+@media (max-width:700px){.w-grid{grid-template-columns:1fr}}
+.form{display:grid;gap:10px}
+.form label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.form input,.form select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.letter{font-family:var(--serif);font-size:16.5px;line-height:1.75;background:var(--surface2);border-radius:var(--r);padding:18px 20px;white-space:pre-wrap}
+.letter mark{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 3px;font-style:normal}
+.letter .blank{background:var(--star-soft);color:var(--star);border-radius:3px;padding:0 4px}
+.skel{display:grid;gap:12px}
+.skel .part{border-left:3px solid var(--accent);padding:4px 0 4px 14px}
+.skel .part h4{margin:0 0 4px;font-size:13px;color:var(--accent);letter-spacing:.04em}
+.skel .part p{margin:0;font-family:var(--serif);font-size:15.5px;line-height:1.7}
+.skel .part p .blank{background:var(--star-soft);color:var(--star);border-radius:3px;padding:0 4px;font-family:var(--sans);font-size:13px}
+.bank{display:grid;gap:8px}
+.bank .s{padding:10px 12px;background:var(--surface2);border-radius:8px}
+.bank .s .e{font-family:var(--serif);font-size:15.5px;line-height:1.55}
+.bank .s .e b{color:var(--accent);font-weight:600}
+.bank .s .c{font-size:13px;color:var(--muted);margin-top:2px}
+.subtabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.subtabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 13px;font-size:13px;color:var(--muted)}
+.subtabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.wc{font-size:12px;color:var(--faint);text-align:right;margin-top:6px;font-variant-numeric:tabular-nums}
+@media (max-width:480px){
+  .card .zh{font-size:23px} .card .en{font-size:32px}
+  .actions .btn{min-width:0;flex:1}
+  .kbd{display:none}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>选必一默写本 <small>新外研版 · 选择性必修第一册 · Unit 2–5</small></h1>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="practice">默写</button>
+    <button role="tab" aria-selected="false" data-tab="wrong">错题本</button>
+    <button role="tab" aria-selected="false" data-tab="list">单词表</button>
+    <button role="tab" aria-selected="false" data-tab="print">打印默写纸</button>
+    <button role="tab" aria-selected="false" data-tab="writing">邀请信模板</button>
+  </nav>
+</header>
+
+<!-- ============ 默写 ============ -->
+<section id="tab-practice">
+  <div class="panel" id="setup">
+    <h2>选择范围</h2>
+    <div class="row" id="unitChips"></div>
+    <div class="row" style="margin-top:12px">
+      <label class="chip"><input type="checkbox" id="optStar" checked> 包含课本带 <span class="tag">*</span> 的拓展词</label>
+      <label class="chip"><input type="checkbox" id="optOnlyWeak"> 只练还没过关的词</label>
+      <label class="chip"><input type="checkbox" id="optHint"> 提示首字母</label>
+      <label class="field">每轮 <select id="optCount"><option value="20">20 个</option><option value="30">30 个</option><option value="50">50 个</option><option value="0">全部</option></select></label>
+    </div>
+    <div class="stats" id="rangeStats"></div>
+    <div class="row" style="margin-top:14px;justify-content:space-between">
+      <button class="btn primary big" id="btnStart">开始默写 <span class="kbd">Enter</span></button>
+      <span class="note" style="margin:0">先在纸上写英文，再按空格翻答案，自己判 ✓ / ✗。连续两次写对才算过关。</span>
+    </div>
+  </div>
+
+  <div class="panel" id="quiz" hidden>
+    <div class="progress-line"><span id="qPos"></span><span id="qScore"></span></div>
+    <div class="bar"><i id="qBar"></i></div>
+    <div class="card" id="card"></div>
+    <div class="actions" id="qActions"></div>
+    <p class="note" style="text-align:center"><button class="btn" id="btnQuit" style="padding:5px 12px;font-size:13px">结束本轮</button></p>
+  </div>
+
+  <div class="panel" id="summary" hidden></div>
+</section>
+
+<!-- ============ 错题本 ============ -->
+<section id="tab-wrong" hidden>
+  <div class="panel">
+    <h2>错题本</h2>
+    <p class="note" style="margin-top:0">写错过、还没有连续两次写对的词。在这里可以只默写错词，直到全部过关。</p>
+    <div class="stats" id="wrongStats"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="btnWrongPractice">只默写错题本</button>
+      <button class="btn" id="btnResetProgress">清空全部记录</button>
+    </div>
+    <div id="wrongList"></div>
+  </div>
+</section>
+
+<!-- ============ 单词表 ============ -->
+<section id="tab-list" hidden>
+  <div class="panel">
+    <h2>单词表（用来和课本核对）</h2>
+    <div class="row" id="listUnits"></div>
+    <p class="note">带 <span class="tag">*</span> 的是课本单词表里标星号的拓展词汇。发现和课本不一致的地方，把序号和正确写法发给 Claude 即可修改。</p>
+    <div class="tablewrap"><table id="wordTable"></table></div>
+  </div>
+</section>
+
+<!-- ============ 打印 ============ -->
+<section id="tab-print" hidden>
+  <div class="panel">
+    <h2>生成 A4 默写纸</h2>
+    <p class="note" style="margin-top:0">左边中文，右边留空手写；答案单独一页，写完再翻。顺序随机，每次生成都不一样。</p>
+    <div class="row" style="margin-top:10px" id="printUnits"></div>
+    <div class="row" style="margin-top:10px">
+      <label class="chip"><input type="checkbox" id="pStar" checked> 包含拓展词</label>
+      <label class="chip"><input type="checkbox" id="pWeak"> 只印没过关的词</label>
+      <label class="chip"><input type="checkbox" id="pKey" checked> 附答案页</label>
+      <label class="field">每页 <input type="number" id="pPer" value="40" min="10" max="60" step="2"> 个</label>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn primary big" id="btnPrint">生成并打印</button>
+      <span class="note" style="margin:0" id="printNote"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 邀请信 ============ -->
+<section id="tab-writing" hidden>
+  <div class="panel">
+    <h2>英语作文 · 邀请信高分模板</h2>
+    <div class="subtabs" role="tablist">
+      <button aria-selected="true" data-w="gen">填空生成</button>
+      <button aria-selected="false" data-w="skel">模板骨架</button>
+      <button aria-selected="false" data-w="bank">好句库</button>
+      <button aria-selected="false" data-w="sample">范文</button>
+    </div>
+
+    <div id="w-gen">
+      <p class="note" style="margin-top:0">只填题目给的信息，其余开头、连接、结尾全部套模板。填完直接抄到纸上。全套约 150–170 词，题目要求 100 词左右时，可以去掉“截止日期”和“This is such a golden opportunity…”两句。</p>
+      <div class="w-grid">
+        <div class="form">
+          <label>收信人（Dear ___）<input id="f_to" value="Chris" placeholder="Chris / Mr Smith"></label>
+          <label>活动名称（英文）<input id="f_event" value="Tianjin International Art Festival" placeholder="the Paper-cutting Show"></label>
+          <label>活动性质 <select id="f_kind"><option value="art">艺术 / 文化类（art & culture）</option><option value="sport">体育类（sports）</option><option value="science">科技类（science & technology）</option><option value="volunteer">志愿 / 公益类（volunteering）</option></select></label>
+          <label>时间<input id="f_time" value="from 9 am to 5 pm on 15 October" placeholder="from 9 am to 3 pm next Monday"></label>
+          <label>地点<input id="f_place" value="Tianjin Conservatory of Music" placeholder="the school hall"></label>
+          <label>亮点 1（活动内容，动词原形开头）<input id="f_h1" value="enjoy live performances by artists from over 20 countries" placeholder="watch a dragon dance"></label>
+          <label>亮点 2<input id="f_h2" value="take part in art workshops and talk with the artists face to face" placeholder="learn to make dumplings"></label>
+          <label>报名截止（可空）<input id="f_deadline" value="10 October" placeholder="留空则不写"></label>
+          <label>写信人（落款）<input id="f_from" value="Li Jin" placeholder="Li Hua"></label>
+          <label>开头句式 <select id="f_open"><option value="1">Knowing that you are keen on…（最稳）</option><option value="2">With … approaching, I am writing to…（高级）</option><option value="3">The reason why I am writing… is that…（强调）</option></select></label>
+        </div>
+        <div>
+          <div class="letter" id="letterOut"></div>
+          <div class="wc" id="wc"></div>
+          <div class="row" style="margin-top:8px"><button class="btn" id="btnCopy">复制正文</button><span class="note" style="margin:0">蓝色 = 模板固定句，黄色 = 你填的信息</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="w-skel" hidden>
+      <p class="note" style="margin-top:0">三段式结构（老师课件：Beginning 基本信息 → Main body 细节 → Conclusion 期待与感谢）。背熟蓝色部分，考场只换黄色空。</p>
+      <div class="skel" id="skel"></div>
+    </div>
+
+    <div id="w-bank" hidden>
+      <p class="note" style="margin-top:0">来自老师课件的高分句，按位置分类。每类背 2 句就够用，考试时别全堆上去。</p>
+      <div class="bank" id="bank"></div>
+    </div>
+
+    <div id="w-sample" hidden>
+      <p class="note" style="margin-top:0"><b>题目：</b>假设你是李津，你的英国朋友 Chris 对国际艺术文化很感兴趣。一年一度的天津国际艺术节将于 10 月在天津音乐学院举办。请你给他写一封电子邮件，邀请他一同参加。内容要点：介绍艺术节（时间、地点等）；说明邀请原因（活动亮点、参与益处等）；表达期待，盼望回复。词数不少于 100。</p>
+      <div class="letter" id="sampleOut"></div>
+      <p class="note">这篇范文就是用左边“填空生成”默认内容套出来的，说明模板可以直接用。</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<div id="sheet"></div>
+
+<script>
+// ---------- 数据：新外研版 选择性必修第一册 Unit 2–5（Unit 5 到 p.69 generate 之前）----------
+// [unit, english, pos, chinese, star]  star=1 表示课本单词表标 * 的拓展词
+const RAW = [
+
+[2,"debt","n.","债务，欠款",0],[2,"pace","n.","速度；进度",0],[2,"inform","v.","通知，告知",1],[2,"dread","v.","畏惧，惧怕",1],
+[2,"rarely","adv.","很少，难得",0],[2,"overnight","adv.","突然，一下子",1],[2,"rejection","n.","拒绝，否决",0],[2,"nevertheless","adv.","然而，不过",0],
+[2,"persevere","v.","锲而不舍，坚持不懈",1],[2,"criticism","n.","批评；指责",0],[2,"manuscript","n.","手稿，底稿",1],[2,"rye","n.","黑麦",1],
+[2,"best seller","n.","畅销书；畅销产品",1],[2,"Victorian","adj.","英国维多利亚(女王)时代的",1],[2,"laureate","n.","重要奖项获得者",1],[2,"Poet Laureate","","桂冠诗人",0],
+[2,"classic","n.","名著；经典作品",0],[2,"endurance","n.","(忍)耐力",1],[2,"guarantee","v.","保证；确保",0],[2,"delighted","adj.","愉快的，高兴的",0],
+[2,"outcome","n.","结果，后果",0],[2,"worthwhile","adj.","重要的；值得做的",0],[2,"blanket","n.","毯子，毛毯",0],[2,"beaver","n.","河狸，海狸",1],
+[2,"cucumber","n.","黄瓜",1],[2,"enthusiastic","adj.","热心的，热衷的",0],[2,"contest","n.","比赛，竞赛",0],[2,"upset","adj.","心烦意乱的，烦恼的",0],
+[2,"elect","v.","选举，推选",0],[2,"blessing","n.","幸事，幸运",0],[2,"appreciative","adj.","感激的",0],[2,"worthy","adj.","值得尊敬的；值得赞赏的",0],
+[2,"worthy of","","值得……的",0],[2,"mere","adj.","仅仅，只不过",0],[2,"gentleness","n.","和蔼，温和",0],[2,"companionship","n.","友谊；友好交往",1],
+[2,"fingertip","n.","指尖",1],[2,"outline","n.","外形，轮廓",0],[2,"intoxicate","v.","使兴奋，使陶醉",1],[2,"pageant","n.","盛大的(露天)演出",1],
+[2,"the pageant of","","(历史事件的)缤纷场景",0],[2,"probe","v.","调查；探究",1],[2,"dawn","n.","黎明，破晓",1],[2,"delight","n.","使人高兴的事",1],
+[2,"revelation","n.","展现，显示",1],[2,"workaday","adj.","平凡的；平淡的",1],[2,"amid","prep.","在……之中",1],[2,"haunt","n.","(某人)常去的地方",1],
+[2,"permanent","adj.","长久的；永久的",0],[2,"descend","v.","降临；来临",1],[2,"mighty","adj.","强有力的；雄伟的",1],[2,"strains of","","(音乐的)曲调，旋律",0],
+[2,"orchestra","n.","(大型的)管弦乐队",1],[2,"tactile","adj.","触觉的",1],[2,"perfume","n.","香味",1],[2,"relish","n.","享受，乐趣",1],
+[2,"morsel","n.","(尤指食物的)一小片，一小块",1],[2,"delightful","adj.","令人愉快的，讨人喜欢的",1],[2,"literary","adj.","文学的",0],[2,"embarrassed","adj.","难堪的，尴尬的",0],
+
+[3,"a far cry from","","与……大不相同",0],[3,"shiny","adj.","光滑发亮的，闪光的",1],[3,"association","n.","协会，社团",0],[3,"muddy","adj.","沾满泥的，泥泞的",0],
+[3,"shot","n.","投球，射球，击球",1],[3,"backboard","n.","篮板",1],[3,"give way","","倒塌，向下垮",0],[3,"bump","n.","隆起之处",0],
+[3,"bounce","v.","(使)弹起，(使)反弹",0],[3,"sharpen","v.","使提高，使改进",1],[3,"teammate","n.","队友",1],[3,"footstep","n.","脚步声；足迹",0],
+[3,"follow in one's footsteps","","仿效某人；继承某人(尤指家人)的事业",0],[3,"carry on","","继续",0],[3,"warrior","n.","武士，战士",1],[3,"expectation","n.","预料，预期",0],
+[3,"beyond one's expectations","","超出某人的预期",0],[3,"in a row","","连续地",0],[3,"philosophy","n.","人生哲学",0],[3,"self-belief","n.","自信",1],
+[3,"hoop","n.","(篮球中的)篮圈",1],[3,"cheat","v.","欺骗，作弊",0],[3,"yoga","n.","瑜伽",1],[3,"roller skating","","滑旱冰",0],
+[3,"remarkable","adj.","非凡的；不寻常的",0],[3,"net","n.","球网",0],[3,"spiker","n.","(排球队的)扣球队员，主攻手",1],[3,"burst","v.","突然出现",1],
+[3,"burst onto","","突然出现在……(指突然成功)",0],[3,"vivid","adj.","生动的，逼真的",0],[3,"assign","v.","分配，分派",0],[3,"opponent","n.","(竞争、比赛等的)对手",0],
+[3,"quarter-final","n.","四分之一决赛",1],[3,"preliminary","adj.","初步的；预备的",1],[3,"surgery","n.","外科手术",0],[3,"pay off","","取得成功",0],
+[3,"comeback","n.","东山再起",1],[3,"defeat","v.","战胜，打败",0],[3,"semi-final","n.","半决赛",1],[3,"steely","adj.","钢铁般的；坚定的",0],
+[3,"nerve","n.","意志力",0],[3,"seize","v.","夺取",0],[3,"cooperation","n.","合作，协作",0],[3,"ingredient","n.","(完成某事的)要素，因素",1],
+[3,"teamwork","n.","合作，协作",1],[3,"podium","n.","表演台，讲台",1],[3,"tournament","n.","锦标赛",0],[3,"intense","adj.","紧张的，激烈的",0],
+
+[4,"quote","n.","引文，引语",0],[4,"Dutch","adj.","荷兰的",1],[4,"float","v.","浮，漂",1],[4,"folk","adj.","民间的，民俗的",0],
+[4,"tale","n.","故事",0],[4,"folk tale","","民间故事",0],[4,"motion","n.","动，运动",0],[4,"set ... in motion","","使开始运转(或工作)",0],
+[4,"compose","v.","作(曲)",0],[4,"crouch","v.","蹲下；蹲伏",1],[4,"peacock","n.","(雄)孔雀",0],[4,"princess","n.","公主",0],
+[4,"ethnic","adj.","民族的",1],[4,"heritage","n.","遗产；传统",1],[4,"charm","n.","魅力，魔力",1],[4,"graceful","adj.","优美的，优雅的",1],[4,"abstract","adj.","抽象(派)的",0],[4,"awe-inspiring","adj.","令人起敬的，令人钦佩的",1],
+[4,"installation","n.","现代雕塑装置(除物体外还包括光、声等)",1],[4,"wire","n.","金属丝；电线",0],[4,"cable","n.","电缆",1],
+[4,"innovative","adj.","新颖的，创新的",0],[4,"trend","n.","趋势，动向",0],[4,"wire fence","","铁丝网，铁丝栅栏",0],[4,"contrast","n.","反差，对比",0],
+[4,"Greek","adj.","希腊的",1],[4,"literally","adv.","根据字面意思",0],[4,"technician","n.","巧匠",1],[4,"animation","n.","动画片",1],
+[4,"concept","n.","概念，观念",0],[4,"distinct","adj.","清晰的；明显不同的",0],[4,"innovation","n.","革新，创新",0],
+[5,"seed","n.","种子，籽",0],[5,"distant","adj.","遥远的",0],[5,"answer the call","","响应号召",0],[5,"disgrace","n.","丢脸，耻辱",1],
+[5,"be a disgrace","","是耻辱，是丢脸的事",0],[5,"geologist","n.","地质学家",1],[5,"sample","n.","样本",0],[5,"evolve","v.","进化",1],
+[5,"finch","n.","雀科鸣禽",1],[5,"beak","n.","鸟嘴，喙",1],[5,"suspect","v.","猜想，怀疑，觉得",0],[5,"ancestor","n.","(动物的)原种，祖先",0],
+[5,"evolution","n.","进化(论)",1]
+];
+const UNIT_NAMES = {2:"Onwards and upwards",3:"Faster, higher, stronger",4:"Meeting the muse",5:"Revealing nature（至 generate 前）"};
+const UNITS=[2,3,4,5];
+const WORDS = RAW.map((r,i)=>({id:r[0]+"|"+r[1], idx:i, unit:r[0], en:r[1], pos:r[2], zh:r[3], star:r[4]}));
+
+// ---------- 进度存储 ----------
+const KEY="xb1-dictation-v1";
+let progress={};
+try{ progress = JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ progress={}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(progress)); }catch(e){} }
+function rec(w){ return progress[w.id] || {streak:0,wrong:0,seen:0}; }
+function mastered(w){ return rec(w).streak>=2; }
+function isWeak(w){ const r=rec(w); return r.seen>0 && r.streak<2; }      // 错过、还没连对两次
+function untested(w){ return rec(w).seen===0; }
+function mark(w, ok){
+  const r=rec(w); r.seen++;
+  if(ok){ r.streak++; } else { r.streak=0; r.wrong++; }
+  r.last=ok?1:0; progress[w.id]=r; save();
+}
+
+// ---------- 通用 ----------
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function pool(units, star, weakOnly){
+  return WORDS.filter(w=>units.has(w.unit)&&(star||!w.star)&&(!weakOnly||!mastered(w)));
+}
+function unitChips(container, name, checkedAll=true){
+  container.innerHTML="";
+  UNITS.forEach(u=>{
+    const n=WORDS.filter(w=>w.unit===u).length;
+    const l=document.createElement("label"); l.className="chip";
+    l.innerHTML=`<input type="checkbox" name="${name}" value="${u}" ${checkedAll?"checked":""}> Unit ${u} <span class="n">${UNIT_NAMES[u]} · ${n}</span>`;
+    container.appendChild(l);
+  });
+}
+function selectedUnits(name){ return new Set([...document.querySelectorAll(`input[name=${name}]:checked`)].map(i=>+i.value)); }
+
+// tabs
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+function showTab(t){
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===t));
+  ["practice","wrong","list","print","writing"].forEach(x=>$("#tab-"+x).hidden = x!==t);
+  if(t==="wrong") renderWrong(); if(t==="list") renderList(); if(t==="practice") renderRangeStats();
+  try{ localStorage.setItem(KEY+"-tab", t); }catch(e){}
+}
+
+// ---------- 默写 ----------
+unitChips($("#unitChips"),"u");
+$("#unitChips").addEventListener("change", renderRangeStats);
+["#optStar","#optOnlyWeak"].forEach(s=>$(s).addEventListener("change", renderRangeStats));
+function renderRangeStats(){
+  const units=selectedUnits("u"); const star=$("#optStar").checked;
+  const all=pool(units,star,false);
+  const m=all.filter(mastered).length, weak=all.filter(isWeak).length, un=all.filter(untested).length;
+  $("#rangeStats").innerHTML=`
+    <div class="stat"><b>${all.length}</b><span>范围内单词</span></div>
+    <div class="stat good"><b>${m}</b><span>已过关（连对 2 次）</span></div>
+    <div class="stat warn"><b>${weak}</b><span>待巩固（错过 / 只对 1 次）</span></div>
+    <div class="stat"><b>${un}</b><span>还没默过</span></div>`;
+  $("#btnStart").disabled = pool(units,star,$("#optOnlyWeak").checked).length===0;
+}
+renderRangeStats();
+
+let session=null; // {queue, i, right, wrongList, revealed}
+function startSession(list, label){
+  if(!list.length) return;
+  session={queue:list, i:0, right:0, wrongList:[], revealed:false, label};
+  $("#setup").hidden=true; $("#summary").hidden=true; $("#quiz").hidden=false;
+  showTab("practice"); renderCard();
+}
+$("#btnStart").addEventListener("click",()=>{
+  const units=selectedUnits("u");
+  let list=pool(units,$("#optStar").checked,$("#optOnlyWeak").checked);
+  // 优先级：错过的 > 没默过的 > 只对过一次的 > 已过关的；同级内随机
+  const prio=w=>{const r=rec(w); if(r.seen>0&&r.last===0) return 0; if(r.seen===0) return 1; if(r.streak<2) return 2; return 3;};
+  list=shuffle(list).sort((a,b)=>prio(a)-prio(b));
+  const n=+$("#optCount").value; if(n>0) list=list.slice(0,n);
+  startSession(shuffle(list), "本轮");
+});
+$("#btnQuit").addEventListener("click", finish);
+
+function renderCard(){
+  const w=session.queue[session.i];
+  $("#qPos").textContent=`${session.i+1} / ${session.queue.length}`;
+  $("#qScore").textContent=`✓ ${session.right}   ✗ ${session.wrongList.length}`;
+  $("#qBar").style.width=(session.i/session.queue.length*100)+"%";
+  const hint=$("#optHint").checked;
+  const words=w.en.split(" ");
+  const hintText = hint ? words.map(p=>p[0]+"·".repeat(Math.max(p.length-1,1))).join("  ") : (words.length>1? `${words.length} 个词` : `${w.en.replace(/[^a-zA-Z]/g,"").length} 个字母`);
+  $("#card").innerHTML=`
+    <div class="meta"><span class="tag u">Unit ${w.unit}</span> ${w.star?'<span class="tag">*</span>':""}</div>
+    <div class="pos">${w.pos||"短语"}</div>
+    <div class="zh">${w.zh}</div>
+    ${session.revealed ? `<div class="en">${w.en}</div>` : `<div class="hint">${hintText}</div>`}`;
+  $("#qActions").innerHTML = session.revealed
+    ? `<button class="btn big bad" id="aBad">✗ 写错了 <span class="kbd">F / ←</span></button><button class="btn big ok" id="aOk">✓ 写对了 <span class="kbd">J / →</span></button>`
+    : `<button class="btn big primary" id="aReveal">写好了，翻答案 <span class="kbd">空格</span></button>`;
+  if(session.revealed){ $("#aOk").onclick=()=>answer(true); $("#aBad").onclick=()=>answer(false); }
+  else $("#aReveal").onclick=reveal;
+}
+function reveal(){ if(!session||session.revealed) return; session.revealed=true; renderCard(); }
+function answer(ok){
+  if(!session||!session.revealed) return;
+  const w=session.queue[session.i]; mark(w,ok);
+  if(ok) session.right++; else session.wrongList.push(w);
+  session.i++; session.revealed=false;
+  if(session.i>=session.queue.length) finish(); else renderCard();
+}
+function finish(){
+  if(!session) return;
+  const done=session.i, total=session.queue.length, wl=session.wrongList;
+  $("#quiz").hidden=true; $("#setup").hidden=false; $("#summary").hidden=false;
+  const pct = done? Math.round(session.right/done*100):0;
+  $("#summary").innerHTML=`
+    <h2>本轮结果</h2>
+    <div class="stats">
+      <div class="stat"><b>${done}<span style="font-size:14px;color:var(--muted)"> / ${total}</span></b><span>默写个数</span></div>
+      <div class="stat good"><b>${pct}%</b><span>正确率</span></div>
+      <div class="stat warn"><b>${wl.length}</b><span>写错，已进错题本</span></div>
+    </div>
+    ${wl.length? `<div class="result-list">${wl.map(w=>`<div><b>${w.en}</b>${w.pos} ${w.zh}</div>`).join("")}</div>
+      <div class="actions" style="justify-content:flex-start"><button class="btn primary" id="btnRedo">马上重默这 ${wl.length} 个错词</button></div>`
+      : `<p class="note">这一轮全对！错题本里的词连续写对两次就会自动移出。</p>`}`;
+  if(wl.length) $("#btnRedo").onclick=()=>startSession(shuffle(wl),"错词重默");
+  session=null; renderRangeStats();
+  $("#summary").scrollIntoView({behavior:"smooth",block:"start"});
+}
+document.addEventListener("keydown",e=>{
+  if(e.target.matches("input,select,textarea")) return;
+  if(!session){ if(e.key==="Enter" && !$("#tab-practice").hidden && !$("#btnStart").disabled){ e.preventDefault(); $("#btnStart").click(); } return; }
+  if(e.key===" "||e.key==="Enter"){ e.preventDefault(); if(!session.revealed) reveal(); }
+  else if(e.key==="j"||e.key==="J"||e.key==="ArrowRight"){ e.preventDefault(); answer(true); }
+  else if(e.key==="f"||e.key==="F"||e.key==="ArrowLeft"){ e.preventDefault(); answer(false); }
+});
+
+// ---------- 错题本 ----------
+function renderWrong(){
+  const weak=WORDS.filter(isWeak);
+  const total=WORDS.length, m=WORDS.filter(mastered).length;
+  $("#wrongStats").innerHTML=`
+    <div class="stat warn"><b>${weak.length}</b><span>待巩固</span></div>
+    <div class="stat good"><b>${m}</b><span>已过关</span></div>
+    <div class="stat"><b>${total-m-weak.length}</b><span>还没默过</span></div>
+    <div class="stat"><b>${Math.round(m/total*100)}%</b><span>全部范围总进度</span></div>`;
+  $("#btnWrongPractice").disabled = !weak.length;
+  if(!weak.length){ $("#wrongList").innerHTML=`<div class="empty">错题本是空的。去默写几轮，写错的词会自动出现在这里。</div>`; return; }
+  weak.sort((a,b)=>rec(b).wrong-rec(a).wrong || a.idx-b.idx);
+  $("#wrongList").innerHTML=`<div class="tablewrap"><table>
+    <tr><th>#</th><th>英文</th><th>词性</th><th>中文</th><th>单元</th><th>错次</th><th>状态</th></tr>
+    ${weak.map((w,i)=>{const r=rec(w);return `<tr><td class="num">${i+1}</td><td class="en">${w.en}</td><td>${w.pos}</td><td>${w.zh}</td><td>U${w.unit}</td><td>${r.wrong}</td><td class="st">${r.streak===1?'<span class="dot mid"></span>再对 1 次过关':'<span class="dot bad"></span>上次写错'}</td></tr>`;}).join("")}
+  </table></div>`;
+}
+$("#btnWrongPractice").addEventListener("click",()=>startSession(shuffle(WORDS.filter(isWeak)),"错题本"));
+$("#btnResetProgress").addEventListener("click",()=>{
+  const b=$("#btnResetProgress");
+  if(b.dataset.arm!=="1"){ b.dataset.arm="1"; b.textContent="再点一次确认清空"; b.classList.add("bad"); setTimeout(()=>{b.dataset.arm="";b.textContent="清空全部记录";b.classList.remove("bad");},3000); return; }
+  progress={}; save(); b.dataset.arm=""; b.textContent="清空全部记录"; b.classList.remove("bad"); renderWrong(); renderRangeStats();
+});
+
+// ---------- 单词表 ----------
+unitChips($("#listUnits"),"lu");
+$("#listUnits").addEventListener("change", renderList);
+function renderList(){
+  const units=selectedUnits("lu");
+  const rows=WORDS.filter(w=>units.has(w.unit));
+  let html=`<tr><th>#</th><th>英文</th><th>词性</th><th>中文</th><th>单元</th><th>状态</th></tr>`, k=0;
+  rows.forEach(w=>{const r=rec(w);
+    const st = r.seen===0?'<span class="dot"></span>未默':mastered(w)?'<span class="dot ok"></span>过关':r.streak===1?'<span class="dot mid"></span>对 1 次':'<span class="dot bad"></span>错 '+r.wrong+' 次';
+    html+=`<tr><td class="num">${++k}</td><td class="en">${w.en}${w.star?' <span class="tag">*</span>':""}</td><td>${w.pos}</td><td>${w.zh}</td><td>U${w.unit}</td><td class="st">${st}</td></tr>`;});
+  $("#wordTable").innerHTML=html;
+}
+
+// ---------- 打印 ----------
+unitChips($("#printUnits"),"pu");
+$("#btnPrint").addEventListener("click",()=>{
+  const units=selectedUnits("pu");
+  let list=shuffle(pool(units,$("#pStar").checked,$("#pWeak").checked));
+  if(!list.length){ $("#printNote").textContent="所选范围内没有单词。"; return; }
+  const per=Math.max(10,Math.min(60,+$("#pPer").value||40));
+  const date=new Date().toLocaleDateString("zh-CN");
+  const uLabel="Unit "+[...units].sort().join("、");
+  let html="";
+  for(let p=0;p<list.length;p+=per){
+    const part=list.slice(p,p+per), half=Math.ceil(part.length/2);
+    const col=(arr,off)=>arr.map((w,i)=>`<div class="sheet-row"><span class="n">${p+off+i+1}</span><span class="zh"><i>${w.pos}</i>${w.zh}</span></div>`).join("");
+    html+=`<div class="sheet-page"><div class="sheet-head"><h3>英语单词默写 · 选必一 ${uLabel}</h3><span>姓名：__________　日期：${date}　得分：____ / ${part.length}</span></div>
+      <div class="sheet-cols"><div>${col(part.slice(0,half),0)}</div><div>${col(part.slice(half),half)}</div></div></div>`;
+  }
+  if($("#pKey").checked){
+    html+=`<div class="sheet-page"><div class="sheet-head"><h3>答案 · 选必一 ${uLabel}</h3><span>共 ${list.length} 个</span></div>
+      <div class="sheet-cols"><div>${list.slice(0,Math.ceil(list.length/2)).map((w,i)=>`<div class="key-row"><span class="n">${i+1}</span><span class="en">${w.en}</span><span>${w.pos} ${w.zh}</span></div>`).join("")}</div>
+      <div>${list.slice(Math.ceil(list.length/2)).map((w,i)=>`<div class="key-row"><span class="n">${Math.ceil(list.length/2)+i+1}</span><span class="en">${w.en}</span><span>${w.pos} ${w.zh}</span></div>`).join("")}</div></div></div>`;
+  }
+  $("#sheet").innerHTML=html;
+  $("#printNote").textContent=`已生成 ${list.length} 个词，${Math.ceil(list.length/per)} 页默写纸${$("#pKey").checked?" + 1 页答案":""}。如果没弹出打印窗口，请按 Ctrl/⌘ + P。`;
+  setTimeout(()=>{ try{ window.print(); }catch(e){} }, 50);
+});
+
+// ---------- 邀请信模板 ----------
+const KIND = {
+  art:{passion:"art and culture", benefit:"gain some insight into traditional and modern art", ability:"improve our ability to appreciate art"},
+  sport:{passion:"sports", benefit:"build up your body and make new friends", ability:"promote a healthy lifestyle"},
+  science:{passion:"science and technology", benefit:"broaden your horizons and spark your curiosity", ability:"develop our creative thinking"},
+  volunteer:{passion:"helping others", benefit:"make a real difference to those in need", ability:"raise our awareness of social responsibility"}
+};
+const F=id=>document.getElementById(id).value.trim();
+const M=t=>`<mark>${t}</mark>`, B=t=>`<span class="blank">${t||"____"}</span>`;
+function buildLetter(){
+  const k=KIND[F("f_kind")], ev=B(F("f_event")), t=B(F("f_time")), pl=B(F("f_place")), h1=B(F("f_h1")), h2=B(F("f_h2")), dl=F("f_deadline");
+  const opens={
+    1:`${M("Knowing that you are keen on")} ${B(k.passion)}${M(", I am more than delighted to invite you to")} ${ev}${M(", which is scheduled to be held at")} ${pl} ${t}${M(".")}`,
+    2:`${M("With")} ${ev} ${M("just around the corner, I am writing to invite you to participate in it. As scheduled, it will take place at")} ${pl} ${t}${M(".")}`,
+    3:`${M("The reason why I am writing this letter is that I want to invite you to")} ${ev}${M(", which is scheduled to be held at")} ${pl} ${t}${M(".")}`
+  };
+  const p1=opens[F("f_open")];
+  const p2=`${M("Here are some details about the event. The activity is intended to promote")} ${B(k.passion)} ${M("as well as")} ${B(k.ability)}${M(". There will be a variety of interesting activities. To begin with, you will")} ${h1}${M(". Besides, you can also")} ${h2}${M(". Not only can it help you")} ${B(k.benefit)}${M(", but it can also enrich your experience. This is such a golden opportunity that it can't be missed.")}`
+    + (dl? ` ${M("If interested, please register for it by")} ${B(dl)}${M(". Don't miss the deadline.")}`:"");
+  const p3=`${M("I'm convinced it will live up to your expectations. I would appreciate it if you could confirm your participation at your early convenience. Eagerly looking forward to your early reply.")}`;
+  return {html:`Dear ${B(F("f_to"))},\n\n${p1}\n\n${p2}\n\n${p3}\n\nYours sincerely,\n${B(F("f_from"))}`};
+}
+function renderLetter(){
+  const {html}=buildLetter(); $("#letterOut").innerHTML=html;
+  const plain=$("#letterOut").innerText;
+  const body=plain.split("\n").slice(2,-3).join(" ");
+  $("#wc").textContent="正文约 "+(body.match(/[A-Za-z'-]+/g)||[]).length+" 词（不含称呼、落款）";
+}
+document.querySelectorAll("#w-gen input, #w-gen select").forEach(el=>el.addEventListener("input", renderLetter));
+$("#btnCopy").addEventListener("click", async()=>{
+  const txt=$("#letterOut").innerText;
+  try{ await navigator.clipboard.writeText(txt); $("#btnCopy").textContent="已复制"; }catch(e){ $("#btnCopy").textContent="请手动选中复制"; }
+  setTimeout(()=>$("#btnCopy").textContent="复制正文",1500);
+});
+$("#skel").innerHTML=[
+ ["称呼","Dear "+"<span class='blank'>收信人</span>"+","],
+ ["第一段 · 开头：为什么写信 + 活动名 + 时间地点（2 句）","Knowing that you are keen on <span class='blank'>爱好领域</span>, I am more than delighted to invite you to <span class='blank'>活动名</span>, which is scheduled to be held at <span class='blank'>地点</span> <span class='blank'>时间</span>."],
+ ["第二段 · 主体：目的 → 亮点 1 → 亮点 2 → 益处 →（截止日期）","Here are some details about the event. The activity is intended to promote <span class='blank'>主题</span> as well as <span class='blank'>提升某能力</span>. There will be a variety of interesting activities. To begin with, you will <span class='blank'>亮点 1</span>. Besides, you can also <span class='blank'>亮点 2</span>. Not only can it help you <span class='blank'>益处</span>, but it can also enrich your experience. This is such a golden opportunity that it can't be missed. If interested, please register for it by <span class='blank'>日期</span>."],
+ ["第三段 · 结尾：期待 + 求回复（固定，全文背下）","I'm convinced it will live up to your expectations. I would appreciate it if you could confirm your participation at your early convenience. Eagerly looking forward to your early reply."],
+ ["落款","Yours sincerely,<br><span class='blank'>写信人</span>"]
+].map(([h,p])=>`<div class="part"><h4>${h}</h4><p>${p}</p></div>`).join("");
+const BANK=[
+ ["开头 · 夺人眼球","<b>The reason why</b> I am writing this letter <b>is that</b> I want to invite you to appreciate the Chinese clay sculpture exhibition.","我写这封信的原因是我想邀请你一起参观中国泥塑艺术展。"],
+ ["开头","The Art Festival <b>is scheduled to be held</b> from 9:00 am to 3:00 pm next Monday. <b>Knowing that</b> you have a passion for art, I wonder whether you would like to join us.","艺术节定于下周一上午 9 点至下午 3 点举行。知道你对艺术有热情，我想知道你是否愿意加入我们。"],
+ ["开头","Learning that you <b>are keen on / are enthusiastic about</b> traditional Chinese culture, I'm more than delighted to invite you to participate in it.","知道你喜欢中国传统文化，我非常高兴地邀请你参加这个活动。"],
+ ["开头","<b>As</b> a significant paper-cutting show <b>is approaching / around the corner</b>, I am writing to invite you to participate in it. = <b>With</b> a remarkable paper-cutting show <b>approaching</b>, …","一场重要的剪纸展览即将到来，我写信邀请你参加。"],
+ ["开头 · 正式版（课本）","Woods High School <b>requests the honour of your presence at</b> the opening of Tech Art Festival on the twelfth of November. <b>The event will begin at</b> … <b>and close at</b> … .","邀请您大驾光临……活动将在……开始，在……结束。"],
+ ["中间 · 目的","The activity is <b>to promote</b> the traditional Chinese culture as well as <b>improve our ability to appreciate art</b>.","这个活动是为了弘扬中国传统文化，提高我们欣赏艺术的能力。"],
+ ["中间 · 时间地点","<b>As scheduled</b>, the activity will take place in the school hall at 9 am next Sunday. / The activity is scheduled to last approximately three hours, from 8 am to 11 am.","按计划，活动将于下周日上午九点在学校大厅举行。/ 活动约三小时。"],
+ ["中间 · 引出细节","<b>Here are some details about</b> … / <b>Some details about … are as follows.</b> There will be a variety of interesting activities. <b>To start with</b>, … <b>Besides</b>, … <b>In addition</b>, …","以下是活动细节……首先……其次……另外……"],
+ ["中间 · 益处","<b>Not only can it</b> help you gain some insight into traditional Chinese culture, <b>but also</b> it can enrich your experience. <b>This is such a golden opportunity that it can't be missed.</b>","它不仅能让你更了解中国传统文化，也能丰富你的经历。绝佳机会，不容错过。"],
+ ["中间 · 报名","If interested, please <b>register for it</b> by July 10th. Don't miss the deadline.","如果感兴趣，请在 7 月 10 日前报名。别错过截止日期。"],
+ ["结尾","I'm convinced it will <b>live up to your expectation</b>.","我相信它将不会辜负你的期待。"],
+ ["结尾","I sincerely <b>long for your attendance</b> if you are available. <b>Eagerly looking forward to your early reply.</b>","如果你有时间，我希望你能来。热切期待你的早日回复。"],
+ ["结尾","<b>I'd appreciate it</b> if you could confirm your participation <b>at your early convenience</b>.","如果你能尽早确认参加，我会不胜感激。"],
+ ["结尾","I do hope you can <b>take my invitation into serious consideration</b>. I'm looking forward to your participation.","希望你认真考虑我的邀请。期待你的参加。"],
+ ["结尾 · 正式版（课本）","We do hope you are able to join us at this event. <b>Please reply to confirm your attendance.</b>","希望您能出席。请回复确认。"]
+];
+$("#bank").innerHTML=BANK.map(([t,e,c])=>`<div class="s"><div class="c" style="margin:0 0 3px;color:var(--accent);font-weight:600">${t}</div><div class="e">${e}</div><div class="c">${c}</div></div>`).join("");
+$("#sampleOut").innerHTML=`Dear Chris,
+
+Knowing that you are keen on international art and culture, I am more than delighted to invite you to the annual Tianjin International Art Festival, which is scheduled to be held at Tianjin Conservatory of Music from 9 am to 5 pm on 15 October.
+
+Here are some details about the event. The activity is intended to promote art and culture as well as improve our ability to appreciate art. There will be a variety of interesting activities. To begin with, you will enjoy live performances by artists from over 20 countries. Besides, you can also take part in art workshops and talk with the artists face to face. Not only can it help you gain some insight into traditional and modern art, but it can also enrich your experience. This is such a golden opportunity that it can't be missed. If interested, please let me know by 10 October so that I can book the tickets.
+
+I'm convinced it will live up to your expectations. I would appreciate it if you could confirm your participation at your early convenience. Eagerly looking forward to your early reply.
+
+Yours sincerely,
+Li Jin`;
+document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected", x===b));
+  ["gen","skel","bank","sample"].forEach(x=>$("#w-"+x).hidden = x!==b.dataset.w);
+}));
+renderLetter();
+
+// 恢复上次标签页
+try{ const t=localStorage.getItem(KEY+"-tab"); if(t) showTab(t); }catch(e){}
+</script>
+
+</body>
+</html>
