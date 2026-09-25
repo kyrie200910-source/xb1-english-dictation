@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>选必一默写本</title>
+<title>选必一复习本</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Noto+Sans+SC:wght@400;500;700&display=swap">
 <style>
 :root{
@@ -33,6 +33,7 @@
   --star:#D9B45C; --star-soft:#3B321C;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;cursor:pointer}
@@ -140,6 +141,23 @@ td.st{white-space:nowrap;font-size:12px}
 .subtabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 13px;font-size:13px;color:var(--muted)}
 .subtabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .wc{font-size:12px;color:var(--faint);text-align:right;margin-top:6px;font-variant-numeric:tabular-nums}
+
+/* subject switcher + bio */
+.subject-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.subject{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface)}
+.subject button{border:0;background:transparent;border-radius:999px;padding:6px 18px;font-weight:600;color:var(--muted)}
+.subject button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.card .q{font-size:22px;font-weight:500;line-height:1.5;text-wrap:balance;max-width:34ch;text-align:left}
+.card .a{font-size:17px;line-height:1.7;text-align:left;max-width:60ch;margin-top:10px;padding-top:12px;border-top:1px dashed var(--line);white-space:pre-line}
+.card .a b{color:var(--accent)}
+.btn.mid{background:var(--star-soft);color:var(--star);border-color:transparent}
+.outline h3{font-size:16px;margin:18px 0 6px;font-weight:600}
+.outline h3:first-child{margin-top:0}
+.outline ul{margin:0;padding-left:1.2em;line-height:1.7}
+.outline li b{color:var(--accent)}
+.outline .trap{margin-top:8px;background:var(--bad-soft);border-radius:8px;padding:8px 12px;font-size:14px}
+.outline .trap b{color:var(--bad)}
+.due{font-size:12px;color:var(--faint);margin-left:6px}
 @media (max-width:480px){
   .card .zh{font-size:23px} .card .en{font-size:32px}
   .actions .btn{min-width:0;flex:1}
@@ -151,7 +169,15 @@ td.st{white-space:nowrap;font-size:12px}
 </head>
 <body>
 <div class="wrap">
-<header class="top">
+<div class="subject-bar">
+  <div class="subject" role="tablist">
+    <button role="tab" aria-selected="true" data-subj="en">英语</button>
+    <button role="tab" aria-selected="false" data-subj="bio">生物</button>
+  </div>
+  <span class="note" style="margin:0" id="subjNote"></span>
+</div>
+
+<header class="top" id="hdr-en">
   <h1>选必一默写本 <small>新外研版 · 选择性必修第一册 · Unit 2–5</small></h1>
   <nav class="tabs" role="tablist">
     <button role="tab" aria-selected="true" data-tab="practice">默写</button>
@@ -162,6 +188,17 @@ td.st{white-space:nowrap;font-size:12px}
   </nav>
 </header>
 
+<header class="top" id="hdr-bio" hidden>
+  <h1>稳态与调节 <small>人教版 · 生物选择性必修一 · 第1–2章（体液调节之前）</small></h1>
+  <nav class="tabs" role="tablist" id="bioTabs">
+    <button role="tab" aria-selected="true" data-btab="cards">问答卡</button>
+    <button role="tab" aria-selected="false" data-btab="outline">知识框架</button>
+    <button role="tab" aria-selected="false" data-btab="stats">掌握情况</button>
+  </nav>
+</header>
+
+
+<div id="subj-en">
 <!-- ============ 默写 ============ -->
 <section id="tab-practice">
   <div class="panel" id="setup">
@@ -285,6 +322,52 @@ td.st{white-space:nowrap;font-size:12px}
     </div>
   </div>
 </section>
+
+</div><!-- /subj-en -->
+
+<div id="subj-bio" hidden>
+<section id="btab-cards">
+  <div class="panel" id="bSetup">
+    <h2>选择范围</h2>
+    <div class="row" id="secChips"></div>
+    <div class="row" style="margin-top:12px">
+      <label class="field">模式 <select id="bMode"><option value="srs">按记忆曲线（到期 + 新卡）</option><option value="all">范围内全部随机</option><option value="weak">只练没掌握的</option></select></label>
+      <label class="field">新卡上限 <select id="bNew"><option value="15">15</option><option value="25" selected>25</option><option value="40">40</option><option value="999">不限</option></select></label>
+    </div>
+    <div class="stats" id="bRangeStats"></div>
+    <div class="row" style="margin-top:14px;justify-content:space-between">
+      <button class="btn primary big" id="bStart">开始复习 <span class="kbd">Enter</span></button>
+      <span class="note" style="margin:0">看到问题先在脑子里（或纸上）完整答一遍，再翻答案，诚实自评。“不会”的卡本轮会再出现，直到你答出来。</span>
+    </div>
+  </div>
+  <div class="panel" id="bQuiz" hidden>
+    <div class="progress-line"><span id="bPos"></span><span id="bScore"></span></div>
+    <div class="bar"><i id="bBar"></i></div>
+    <div class="card" id="bCard"></div>
+    <div class="actions" id="bActions"></div>
+    <p class="note" style="text-align:center"><button class="btn" id="bQuit" style="padding:5px 12px;font-size:13px">结束本轮</button></p>
+  </div>
+  <div class="panel" id="bSummary" hidden></div>
+</section>
+
+<section id="btab-outline" hidden>
+  <div class="panel">
+    <h2>知识框架（考前快速通读）</h2>
+    <div class="row" id="outlineChips"></div>
+    <div class="outline" id="outline" style="margin-top:12px"></div>
+  </div>
+</section>
+
+<section id="btab-stats" hidden>
+  <div class="panel">
+    <h2>掌握情况</h2>
+    <p class="note" style="margin-top:0">每张卡按你的自评安排下次出现时间：会 → 间隔逐次拉长（1、3、7、14、30 天），模糊 → 明天再来，不会 → 重新开始。连续几次“会”、间隔到 14 天以上算掌握。</p>
+    <div class="stats" id="bTotals"></div>
+    <div class="tablewrap"><table id="bStatTable"></table></div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="bReset">清空生物复习记录</button></div>
+  </div>
+</section>
+</div><!-- /subj-bio -->
 </div>
 
 <div id="sheet"></div>
@@ -463,7 +546,7 @@ function finish(){
   $("#summary").scrollIntoView({behavior:"smooth",block:"start"});
 }
 document.addEventListener("keydown",e=>{
-  if(e.target.matches("input,select,textarea")) return;
+  if(SUBJ!=="en" || e.target.matches("input,select,textarea")) return;
   if(!session){ if(e.key==="Enter" && !$("#tab-practice").hidden && !$("#btnStart").disabled){ e.preventDefault(); $("#btnStart").click(); } return; }
   if(e.key===" "||e.key==="Enter"){ e.preventDefault(); if(!session.revealed) reveal(); }
   else if(e.key==="j"||e.key==="J"||e.key==="ArrowRight"){ e.preventDefault(); answer(true); }
@@ -607,6 +690,169 @@ document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("clic
   ["gen","skel","bank","sample"].forEach(x=>$("#w-"+x).hidden = x!==b.dataset.w);
 }));
 renderLetter();
+
+// ================= 生物：稳态与调节 第1–2章 =================
+const SEC = {"1.1": "细胞生活的环境", "1.2": "内环境的稳态", "2.1": "神经调节的结构基础", "2.2": "神经调节的基本方式", "2.3": "神经冲动的产生和传导", "2.4": "神经系统的分级调节", "2.5": "人脑的高级功能"};
+const SEC_ORDER = Object.keys(SEC);
+const BIO = [["1.1", "体液由哪两部分组成？各占多少？", "<b>细胞内液</b>（约2/3）和<b>细胞外液</b>（约1/3）。细胞外液包括血浆、组织液、淋巴液等。"], ["1.1", "什么是内环境？", "由<b>细胞外液</b>构成的液体环境，是体内细胞直接生活的环境。主要包括血浆、组织液和淋巴液。"], ["1.1", "血浆、组织液、淋巴液三者之间如何相互转化？（画出箭头关系）", "血浆 <b>⇄</b> 组织液（穿过毛细血管壁，双向）；组织液 <b>→</b> 淋巴液（穿过毛细淋巴管壁，单向）；淋巴液 <b>→</b> 血浆（经左右锁骨下静脉汇入，单向）。"], ["1.1", "血浆的主要成分有哪些？", "水约<b>90%</b>；蛋白质<b>7%–9%</b>；无机盐约<b>1%</b>；以及血液运送的各种营养物质（葡萄糖、氨基酸等）、代谢废物（尿素等）、气体、激素等。"], ["1.1", "血浆与组织液、淋巴液在成分上的主要区别是什么？", "血浆中<b>蛋白质含量较多</b>，组织液和淋巴液中蛋白质含量很少。其他成分基本相同。"], ["1.1", "细胞外液本质上是什么溶液？说明了什么？", "本质上是一种<b>盐溶液</b>，类似于海水；在一定程度上反映了<b>生命起源于海洋</b>。"], ["1.1", "什么是渗透压？其大小取决于什么？", "溶液中<b>溶质微粒对水的吸引力</b>。溶质微粒数目越多，浓度越高，渗透压越高。"], ["1.1", "血浆渗透压的大小主要与什么有关？细胞外液渗透压主要来源于什么？", "主要与<b>无机盐、蛋白质</b>的含量有关；细胞外液渗透压90%以上来源于<b>Na⁺和Cl⁻</b>。"], ["1.1", "37℃时人的血浆渗透压约为多少？与细胞内液比较如何？", "约<b>770 kPa</b>，相当于细胞内液的渗透压。"], ["1.1", "正常人血浆pH范围？维持稳定与哪些离子有关？", "<b>7.35–7.45</b>；与<b>HCO₃⁻、HPO₄²⁻</b>等离子有关（缓冲对H₂CO₃/NaHCO₃、NaH₂PO₄/Na₂HPO₄）。"], ["1.1", "人体细胞外液的温度一般维持在多少？", "<b>37℃</b>左右。"], ["1.1", "内环境在细胞与外界环境之间起什么作用？需要哪些系统参与？", "内环境是细胞与外界环境进行<b>物质交换的媒介</b>。需要<b>消化、呼吸、循环、泌尿</b>等系统直接参与，还需神经—体液—免疫调节。"], ["1.1", "下列哪些属于内环境成分：血红蛋白、血浆蛋白、呼吸酶、抗体、神经递质、消化酶、葡萄糖、尿素？", "属于：<b>血浆蛋白、抗体、神经递质、葡萄糖、尿素</b>。不属于：血红蛋白（红细胞内）、呼吸酶（细胞内）、消化酶（消化道属于外界环境）。"], ["1.1", "下列过程哪些发生在内环境中：细胞呼吸、抗原抗体结合、乳酸与NaHCO₃反应、淀粉消化、神经递质与受体结合？", "发生在内环境：<b>抗原抗体结合、乳酸与NaHCO₃反应、神经递质与受体结合</b>。不在：细胞呼吸（细胞内）、淀粉消化（消化道）。"], ["1.1", "体内绝大多数细胞直接生活在哪种液体中？血细胞、淋巴细胞呢？", "绝大多数细胞生活在<b>组织液</b>中；血细胞在<b>血浆</b>；淋巴细胞在<b>淋巴液和血浆</b>；毛细血管壁细胞在血浆和组织液；毛细淋巴管壁细胞在淋巴液和组织液。"], ["1.1", "O₂从外界进入组织细胞被利用，至少要穿过多少层膜？（以肺泡到组织细胞、线粒体内利用计）", "肺泡壁（2层）+ 毛细血管壁（2层）+ 进入红细胞（1）+ 出红细胞（1）+ 毛细血管壁（2）+ 组织细胞膜（1）+ 线粒体双层膜（2）= <b>11层</b>膜（肺泡壁和毛细血管壁均为单层细胞）。"], ["1.2", "什么是稳态？", "正常机体通过<b>调节作用</b>，使各个器官、系统协调活动，共同维持内环境的<b>相对稳定状态</b>。内环境的每一种成分和理化性质都处于<b>动态平衡</b>中。"], ["1.2", "内环境稳态的调节机制是什么？（目前普遍认为）", "<b>神经—体液—免疫</b>调节网络。"], ["1.2", "关于稳态调节机制，贝尔纳和坎农分别提出了什么观点？", "<b>贝尔纳</b>：内环境的恒定主要依赖于神经系统的调节。<b>坎农</b>：稳态是在神经调节和体液调节的共同作用下，通过机体各器官、系统分工合作、协调统一而实现的。"], ["1.2", "内环境稳态的意义是什么？", "机体进行<b>正常生命活动的必要条件</b>。（如：血糖、含氧量正常保证能量供应；温度、pH正常保证酶活性）"], ["1.2", "人体维持稳态的调节能力有什么特点？", "<b>有一定限度</b>。外界环境变化过于剧烈，或人体自身调节功能出现障碍时，稳态就会遭到破坏。"], ["1.2", "举例说明稳态失调会引起哪些疾病。", "血糖失调：低血糖、糖尿病；pH失调：酸中毒、碱中毒；体温失调：发热、中暑；渗透压失调：<b>组织水肿</b>；血钙过低：抽搐。"], ["1.2", "引起组织水肿的常见原因有哪些？", "① 营养不良、肾炎等使<b>血浆蛋白减少</b>，血浆渗透压下降；② 过敏使<b>毛细血管通透性增大</b>，蛋白质进入组织液；③ <b>淋巴回流受阻</b>；④ 局部代谢产物增多；⑤ 肾小球滤过率下降。"], ["1.2", "剧烈运动产生的乳酸进入血液后，血浆pH为什么不会明显下降？", "乳酸与血浆中的<b>NaHCO₃</b>反应生成乳酸钠和H₂CO₃；H₂CO₃分解为CO₂和H₂O，CO₂由<b>肺</b>排出。"], ["1.2", "碱性物质（如Na₂CO₃）进入血液后如何被缓冲？", "与<b>H₂CO₃</b>反应生成NaHCO₃，过多的NaHCO₃由<b>肾</b>排出。"], ["1.2", "血液生化检查中，为什么各项指标有一个正常范围而不是固定值？", "内环境的成分处于<b>动态平衡</b>，随年龄、性别、生理状态等而波动；超出正常范围可能提示机体某些功能异常。"], ["1.2", "稳态的概念可扩展到哪些层次？各举一例。", "<b>分子水平</b>：基因表达、激素分泌的稳态；<b>细胞水平</b>：细胞分裂与分化的稳态；<b>器官水平</b>：心脏活动的稳态；<b>群体水平</b>：种群数量的稳态。"], ["2.1", "神经系统由哪两部分组成？各包括什么？", "<b>中枢神经系统</b>：脑（大脑、小脑、脑干等）和脊髓；<b>外周神经系统</b>：脑神经（12对）和脊神经（31对）。"], ["2.1", "大脑、小脑、脑干、下丘脑各有什么功能？", "<b>大脑</b>：大脑皮层是调节机体活动的最高级中枢；<b>小脑</b>：协调运动，维持身体平衡；<b>脑干</b>：呼吸、心跳等基本生命活动的中枢；<b>下丘脑</b>：体温调节、水平衡调节、生物节律等。"], ["2.1", "脊髓的功能是什么？", "是脑与躯干、内脏之间的<b>联系通路</b>；也能完成一些简单的<b>反射</b>活动（如缩手反射、膝跳反射）。"], ["2.1", "外周神经系统按功能分为哪几类？", "<b>传入神经</b>（感觉神经）和<b>传出神经</b>（运动神经）。传出神经又分为<b>躯体运动神经</b>（支配骨骼肌，受意识支配）和<b>自主神经</b>（内脏运动神经，支配内脏、血管和腺体，不受意识支配）。"], ["2.1", "自主神经系统包括哪两部分？为什么叫“自主”？", "<b>交感神经</b>和<b>副交感神经</b>。它们的活动不受意识支配，故称自主神经系统。"], ["2.1", "交感神经兴奋时，心跳、支气管、瞳孔、胃肠蠕动、消化腺分泌各有什么变化？", "心跳<b>加快</b>、支气管<b>扩张</b>、瞳孔<b>扩大</b>、胃肠蠕动<b>减弱</b>、消化腺分泌<b>减少</b>（应急、活动状态占优势）。"], ["2.1", "副交感神经兴奋时有什么效应？何时占优势？", "心跳<b>减慢</b>、支气管收缩、瞳孔<b>缩小</b>、胃肠蠕动<b>加强</b>、消化腺分泌<b>增加</b>；<b>安静</b>时占优势，促进消化吸收、积蓄能量。"], ["2.1", "交感神经和副交感神经的作用有什么关系？意义是什么？", "对同一器官的作用通常<b>相反</b>（拮抗）；使机体对外界刺激作出更<b>精确</b>的反应，适应环境变化。"], ["2.1", "神经系统结构和功能的基本单位是什么？由哪几部分构成？", "<b>神经元</b>。由<b>细胞体</b>、<b>树突</b>（短而多，接受信息传入细胞体）和<b>轴突</b>（长而少，将信息传出）组成。"], ["2.1", "神经纤维、神经末梢、神经分别指什么？", "<b>神经纤维</b>：轴突（或长树突）及套在外面的髓鞘；<b>神经末梢</b>：神经纤维末端的细小分支；<b>神经</b>：多条神经纤维集结成束，外包结缔组织膜。"], ["2.1", "神经胶质细胞有什么特点和功能？", "数量为神经元的<b>10–50倍</b>；对神经元起<b>支持、保护、营养和修复</b>等作用；参与构成神经纤维表面的<b>髓鞘</b>。"], ["2.1", "神经元的基本功能是什么？", "接受刺激产生<b>兴奋</b>，并<b>传导</b>兴奋（还能把兴奋传递给其他神经元或效应器）。"], ["2.2", "什么是反射？它是什么的基本方式？", "在<b>中枢神经系统参与</b>下，机体对内外刺激所产生的<b>规律性应答</b>。反射是<b>神经调节</b>的基本方式。"], ["2.2", "完成反射的条件是什么？", "① 具有<b>完整的反射弧</b>；② 有<b>适宜的刺激</b>。反射弧任一环节受损，反射都不能完成。"], ["2.2", "反射弧由哪五部分组成？效应器指什么？", "<b>感受器 → 传入神经 → 神经中枢 → 传出神经 → 效应器</b>。效应器 = 传出神经末梢和它所支配的<b>肌肉或腺体</b>。"], ["2.2", "如何判断一个反射弧中的传入神经与传出神经？", "① 有<b>神经节</b>的是传入神经；② 与感受器相连的是传入神经，与效应器相连的是传出神经；③ 脊髓灰质<b>后角（窄）</b>连传入，<b>前角（宽）</b>连传出。"], ["2.2", "刺激传出神经引起效应器反应，属于反射吗？为什么？", "<b>不属于</b>。反射必须经过完整的反射弧且有中枢神经系统参与；仅刺激传出神经或效应器引起的反应不是反射。"], ["2.2", "非条件反射和条件反射的区别（形成、中枢、是否消退）？各举两例。", "<b>非条件反射</b>：生来就有、不学而能；中枢在脑干或脊髓；不会消退（缩手反射、膝跳反射、眨眼反射、吮吸反射）。<b>条件反射</b>：出生后通过学习和训练形成；必须有<b>大脑皮层</b>参与；可以消退（望梅止渴、谈虎色变、听铃声分泌唾液）。"], ["2.2", "条件反射是如何建立的？（以巴甫洛夫实验说明）", "<b>无关刺激</b>（铃声）与<b>非条件刺激</b>（食物）<b>多次结合</b>，无关刺激转化为<b>条件刺激</b>，狗听到铃声就分泌唾液——条件反射建立在非条件反射基础上。"], ["2.2", "条件反射为什么会消退？消退的本质是什么？", "反复给条件刺激而<b>不给非条件刺激</b>，条件反射会逐渐减弱直至消失。消退不是简单消失，而是<b>新的学习过程</b>，需要大脑皮层参与（中枢把原来引起兴奋的信号转变为抑制信号）。"], ["2.2", "条件反射的意义是什么？", "使机体具有更强的<b>预见性、灵活性和适应性</b>，大大提高了动物应对复杂环境变化的能力。"], ["2.2", "缩手反射时先缩手后感觉痛，说明什么？痛觉在哪里产生？", "说明缩手反射的中枢在<b>脊髓</b>（低级中枢），完成得快；痛觉在<b>大脑皮层</b>产生，需要兴奋上传，所以后感觉痛。产生痛觉的过程<b>不是反射</b>（未经过完整反射弧）。"], ["2.3", "什么是兴奋？兴奋在神经纤维上以什么形式传导？", "动物体或人体内的某些组织（如神经组织）或细胞感受外界刺激后，由<b>相对静止状态变为显著活跃状态</b>的过程。在神经纤维上以<b>电信号</b>（神经冲动）的形式传导。"], ["2.3", "静息电位的表现和产生原因？", "<b>外正内负</b>。静息时膜主要对<b>K⁺</b>通透性大，<b>K⁺外流</b>（顺浓度梯度，协助扩散）形成。"], ["2.3", "动作电位的表现和产生原因？", "<b>外负内正</b>。受刺激时<b>Na⁺通道打开</b>，<b>Na⁺内流</b>（顺浓度梯度，协助扩散，不耗能）形成。"], ["2.3", "动作电位后膜电位如何恢复？Na⁺、K⁺的浓度差如何维持？", "Na⁺通道关闭，K⁺通道打开，<b>K⁺外流</b>恢复静息电位；随后<b>钠钾泵</b>把Na⁺泵出、K⁺泵入（<b>主动运输</b>，耗能），维持膜外Na⁺高、膜内K⁺高。"], ["2.3", "神经细胞膜内外Na⁺、K⁺的分布特点？", "膜<b>外Na⁺浓度高</b>，膜<b>内K⁺浓度高</b>。"], ["2.3", "局部电流的方向如何？兴奋传导方向与哪个方向一致？", "膜<b>外</b>：由未兴奋部位流向兴奋部位；膜<b>内</b>：由兴奋部位流向未兴奋部位。兴奋传导方向与<b>膜内</b>局部电流方向一致。"], ["2.3", "兴奋在神经纤维上传导有什么特点？", "① 离体神经纤维上<b>双向</b>传导（刺激点向两侧）；② 在反射弧中<b>单向</b>（因突触）；③ 电位大小不随刺激强度增大而增大（<b>全或无</b>）；④ 有髓鞘的神经纤维传导快。"], ["2.3", "若细胞外Na⁺浓度降低，动作电位有何变化？若细胞外K⁺浓度升高呢？", "细胞外Na⁺降低 → 内流减少 → 动作电位<b>峰值降低</b>；细胞外K⁺升高 → K⁺外流减少 → 静息电位<b>绝对值减小</b>（外正内负的差值变小）。"], ["2.3", "突触由哪三部分组成？突触间隙中是什么液体？", "<b>突触前膜</b>（突触小体的膜）、<b>突触间隙</b>、<b>突触后膜</b>（下一个神经元的细胞体膜或树突膜，或肌肉、腺体细胞膜）。突触间隙充满<b>组织液</b>。"], ["2.3", "什么是突触小体？内含什么？", "轴突末梢膨大形成的杯状或球状结构；内含大量<b>突触小泡</b>，小泡内含<b>神经递质</b>；还含较多线粒体。"], ["2.3", "描述兴奋在突触处传递的过程。", "兴奋传到轴突末梢 → 突触小泡与前膜融合，以<b>胞吐</b>方式释放神经递质（耗能，依赖Ca²⁺）→ 递质经<b>扩散</b>通过突触间隙 → 与突触后膜上的<b>特异性受体</b>结合 → 后膜离子通道开放 → 后膜电位变化（兴奋或抑制）。"], ["2.3", "神经递质发挥作用后去向如何？意义？", "被相应<b>酶降解</b>，或被<b>回收</b>进突触小体（转运蛋白），或扩散离开。保证递质<b>不持续起作用</b>，突触后膜能接受新的信号。"], ["2.3", "突触传递中的信号转换过程？", "<b>电信号 → 化学信号 → 电信号</b>。"], ["2.3", "兴奋在突触处传递有什么特点？为什么？", "① <b>单向</b>传递：递质只存在于突触小体内，只能由前膜释放作用于后膜；② <b>突触延搁</b>：速度比在神经纤维上慢（有化学信号转换过程）。"], ["2.3", "兴奋性递质和抑制性递质分别使后膜发生什么变化？", "兴奋性递质 → 后膜<b>Na⁺内流</b>，产生兴奋性突触后电位（外负内正）；抑制性递质 → 后膜<b>Cl⁻内流</b>（或K⁺外流），膜电位差增大，更难兴奋。"], ["2.3", "常见的神经递质有哪些？", "<b>乙酰胆碱</b>、多巴胺、去甲肾上腺素、肾上腺素、5-羟色胺、氨基酸类（谷氨酸、甘氨酸、γ-氨基丁酸）、一氧化氮等。"], ["2.3", "可卡因为什么会使人成瘾？", "可卡因与突触前膜上<b>多巴胺转运蛋白</b>结合，阻止多巴胺<b>回收</b>，多巴胺持续作用于后膜，产生欣快感；长期使用导致后膜多巴胺受体减少，需更多毒品才有同样效果 → 成瘾。"], ["2.3", "有机磷农药中毒为什么会肌肉持续收缩？", "有机磷抑制<b>乙酰胆碱酯酶</b>活性，乙酰胆碱不能被分解，<b>持续</b>作用于突触后膜，肌肉持续收缩（震颤）。"], ["2.3", "突触后膜上的受体本质是什么？递质与受体结合后一定引起后膜兴奋吗？", "本质是<b>蛋白质</b>（糖蛋白）。不一定：兴奋性递质引起兴奋，<b>抑制性递质</b>引起抑制。"], ["2.3", "在离体神经纤维中段给予刺激，电流表两极均在膜外时指针如何偏转？", "兴奋先后到达两电极处，指针发生<b>两次方向相反</b>的偏转；若两电极位于刺激点两侧等距，兴奋同时到达，指针<b>不偏转</b>。"], ["2.4", "什么是神经系统的分级调节？", "位于脊髓的低级中枢受<b>脑中相应高级中枢</b>的调控。<b>大脑皮层</b>是最高级中枢，各级中枢分工合作、相互联系。"], ["2.4", "以排尿反射为例说明分级调节。", "排尿反射的初级中枢在<b>脊髓</b>；膀胱充盈 → 传入信号到脊髓并上传<b>大脑皮层</b>产生尿意；大脑皮层可<b>控制</b>脊髓中枢，决定是否排尿（有意识地憋尿或排尿）。"], ["2.4", "婴儿为什么不能控制排尿？脊髓截瘫（高位截瘫）患者为什么尿失禁？", "婴儿<b>大脑皮层发育不完善</b>，对脊髓的控制能力弱。截瘫患者脊髓与大脑联系<b>中断</b>，排尿反射仍能由脊髓完成（反射弧完整），但<b>不受意识控制</b>，也无尿意。"], ["2.4", "自主神经系统是否受高级中枢调控？举例。", "<b>受</b>大脑皮层等高级中枢的调控。如：紧张时心跳加快，但通过大脑皮层的调节（深呼吸、自我暗示）可使心跳平复。"], ["2.4", "脑干、下丘脑、小脑、脊髓各是什么中枢？", "<b>脑干</b>：呼吸中枢、心血管运动中枢等基本生命活动中枢；<b>下丘脑</b>：体温调节、水盐平衡、生物节律中枢；<b>小脑</b>：平衡中枢；<b>脊髓</b>：许多简单反射的低级中枢。"], ["2.5", "大脑皮层有哪些高级功能？", "感知外部世界、控制机体的反射活动，以及<b>语言、学习、记忆和情绪</b>等方面的高级功能。"], ["2.5", "语言功能有什么特点？涉及哪些方面？", "是<b>人脑特有</b>的高级功能，涉及<b>听、说、读、写</b>；与大脑皮层的言语区有关。"], ["2.5", "W区受损会怎样？", "W区（<b>书写</b>性语言中枢）受损：<b>失写症</b>——能听、说、看，但不能写字。"], ["2.5", "S区受损会怎样？", "S区（<b>运动</b>性语言中枢，speak）受损：<b>运动性失语症</b>——能听懂、能看、能写，但不能讲话。"], ["2.5", "H区受损会怎样？", "H区（<b>听觉</b>性语言中枢，hear）受损：<b>听觉性失语症</b>——能讲话、能看、能写，但听不懂别人讲话。"], ["2.5", "V区受损会怎样？", "V区（<b>视觉</b>性语言中枢，visual）受损：<b>失读症</b>——能听、说、写，但看不懂文字。"], ["2.5", "什么是学习？什么是记忆？", "<b>学习</b>：神经系统不断接受刺激，获得新的行为、习惯和积累经验的过程。<b>记忆</b>：将获得的经验进行<b>储存和再现</b>。"], ["2.5", "记忆的形成分为哪几个阶段？", "<b>感觉性记忆</b>（瞬时）→ <b>短时记忆</b>（第一级记忆）→ <b>长时记忆</b>（第二级记忆）→ 永久记忆（第三级记忆）。经反复运用、强化，短时记忆可转为长时记忆。"], ["2.5", "短时记忆和长时记忆的形成分别可能与什么有关？", "<b>短时记忆</b>：主要与神经元的活动及神经元之间的联系有关，尤其与大脑皮层下<b>海马</b>脑区有关；<b>长时记忆</b>：可能与<b>新突触的建立</b>有关。"], ["2.5", "情绪是什么？消极情绪长期得不到缓解会怎样？", "情绪是人脑的<b>高级功能</b>之一。适度的压力有利于保持积极状态；<b>消极情绪</b>长期得不到缓解，可能引发<b>抑郁</b>，严重的抑郁可能发展为抑郁症。"], ["2.5", "出现抑郁情绪时可以怎样调节？", "主动倾诉、寻求家人朋友帮助、运动、合理作息；严重时寻求专业心理咨询或治疗。（课本强调：抑郁可以调节和治疗，不必讳疾忌医）"]].map((c,i)=>({id:"b"+i, sec:c[0], q:c[1], a:c[2]}));
+const OUTLINE = {"1.1": {"pts": ["<b>体液</b> = 细胞内液(2/3) + 细胞外液(1/3)；<b>内环境</b> = 细胞外液 = 血浆 + 组织液 + 淋巴液", "三者关系：血浆 ⇄ 组织液 → 淋巴液 → 血浆（淋巴经左右锁骨下静脉回血）", "血浆成分：水 90%、蛋白质 7%–9%、无机盐 1%、营养物质/代谢废物/气体/激素；<b>与组织液、淋巴液的区别：蛋白质多</b>", "理化性质：<b>渗透压</b>（Na⁺、Cl⁻ 贡献 90% 以上；37℃ 约 770 kPa）、<b>pH</b> 7.35–7.45（HCO₃⁻、HPO₄²⁻）、<b>温度</b> 37℃", "内环境是细胞与外界进行物质交换的<b>媒介</b>；直接参与的系统：消化、呼吸、循环、泌尿"], "trap": "血红蛋白、呼吸酶、消化酶、DNA 聚合酶都<b>不是</b>内环境成分；细胞呼吸、消化道内消化、DNA 复制都<b>不发生</b>在内环境。"}, "1.2": {"pts": ["稳态定义：机体通过调节使各器官系统协调活动，共同维持内环境的<b>相对稳定</b>；每种成分和理化性质都处于<b>动态平衡</b>", "调节机制：贝尔纳（神经）→ 坎农（神经 + 体液）→ 现代（<b>神经—体液—免疫调节网络</b>）", "意义：正常生命活动的<b>必要条件</b>；调节能力<b>有限度</b>", "失调举例：糖尿病 / 低血糖、酸碱中毒、发热 / 中暑、<b>组织水肿</b>、血钙低抽搐", "缓冲：乳酸 + NaHCO₃ → 乳酸钠 + H₂CO₃ → CO₂（肺排）；Na₂CO₃ + H₂CO₃ → NaHCO₃（肾排）"], "trap": "稳态是“相对稳定”不是“恒定不变”；组织水肿的五种原因（血浆蛋白少、毛细血管通透性↑、淋巴回流受阻、代谢产物↑、肾滤过率↓）要能对应具体情境。"}, "2.1": {"pts": ["<b>中枢神经系统</b>：脑（大脑皮层—最高级中枢；小脑—平衡；脑干—呼吸心跳；下丘脑—体温、水盐、节律）+ 脊髓（联系通路 + 简单反射）", "<b>外周神经系统</b>：脑神经 12 对 + 脊神经 31 对；按功能分传入神经 / 传出神经", "传出神经 = 躯体运动神经（骨骼肌，受意识）+ <b>自主神经</b>（内脏、血管、腺体，不受意识）", "自主神经 = <b>交感</b>（应急：心跳↑ 支气管扩张 瞳孔大 胃肠↓ 消化腺↓）+ <b>副交感</b>（安静：相反）；二者拮抗，反应更精确", "<b>神经元</b>：细胞体 + 树突（短多，传入）+ 轴突（长少，传出）；神经纤维 = 轴突 + 髓鞘；神经 = 多条纤维成束 + 结缔组织", "<b>神经胶质细胞</b>：数量 10–50 倍；支持、保护、营养、修复；参与形成髓鞘"], "trap": "下丘脑属于脑，是中枢神经系统的一部分；交感 / 副交感对胃肠和瞳孔的效应最容易记反——记住“交感 = 打架逃跑，不消化”。"}, "2.2": {"pts": ["<b>反射</b>：中枢神经系统参与 + 内外刺激 + 规律性应答；神经调节的基本方式", "<b>反射弧</b>：感受器 → 传入神经（有神经节）→ 神经中枢 → 传出神经 → 效应器（传出神经末梢 + 肌肉或腺体）", "完成条件：反射弧完整 + 适宜刺激；任一环节受损反射不能完成", "<b>非条件反射</b>：先天、脑干 / 脊髓、不消退 ｜ <b>条件反射</b>：后天学习、必须大脑皮层参与、可消退", "建立：无关刺激与非条件刺激多次结合 → 条件刺激；消退：只给条件刺激不给非条件刺激，本质是<b>新的学习</b>", "意义：预见性、灵活性、适应性"], "trap": "直接刺激传出神经或效应器引起的反应<b>不是反射</b>；“感觉”（痛觉、尿意）在大脑皮层产生，但产生感觉的过程不是反射。"}, "2.3": {"pts": ["<b>静息电位</b>：外正内负，K⁺外流（协助扩散）｜ <b>动作电位</b>：外负内正，Na⁺内流（协助扩散）｜ 恢复：K⁺外流，再由<b>钠钾泵</b>主动运输复位", "膜外 Na⁺高、膜内 K⁺高；<b>局部电流</b>膜内由兴奋→未兴奋，传导方向与膜内电流一致", "纤维上传导：离体<b>双向</b>、反射弧中单向、全或无、有髓鞘快", "<b>突触</b> = 前膜（突触小体膜）+ 间隙（组织液）+ 后膜（胞体膜 / 树突膜 / 肌细胞膜 / 腺细胞膜）", "传递：小泡<b>胞吐</b>释放递质（耗能、Ca²⁺）→ 扩散 → 与后膜<b>特异性受体</b>结合 → 离子通道开放 → 兴奋（Na⁺内流）或抑制（Cl⁻内流）→ 递质被<b>降解或回收</b>", "特点：<b>单向</b>（递质只在前膜）、<b>延搁</b>；信号：电 → 化学 → 电", "应用：可卡因阻止多巴胺回收 → 成瘾；有机磷抑制乙酰胆碱酯酶 → 肌肉持续收缩"], "trap": "Na⁺内流、K⁺外流都是<b>协助扩散不耗能</b>，只有钠钾泵是主动运输；递质释放是胞吐，<b>不经过通道</b>；递质与受体结合后不一定兴奋。"}, "2.4": {"pts": ["<b>分级调节</b>：脊髓等低级中枢受脑中高级中枢调控；大脑皮层是最高级中枢", "排尿反射：初级中枢在<b>脊髓</b>，大脑皮层可控制（憋尿 / 主动排尿）", "婴儿尿床：大脑皮层发育不完善；高位截瘫：脊髓与脑联系中断，反射仍能完成但<b>不受意识控制</b>、无尿意", "自主神经系统同样受大脑皮层等高级中枢调控"], "trap": "截瘫患者“有反射、无感觉、不能控制”三点要分清；不要说截瘫患者“不能排尿”。"}, "2.5": {"pts": ["大脑皮层高级功能：感知、控制反射、<b>语言、学习、记忆、情绪</b>", "语言是人脑<b>特有</b>；言语区：<b>W</b>写（失写症）、<b>S</b>说（运动性失语症）、<b>H</b>听（听觉性失语症）、<b>V</b>看（失读症）", "学习 = 获得新行为 / 经验；记忆 = 储存和再现", "记忆：感觉性记忆 → 短时记忆（神经元活动与联系，<b>海马</b>）→ 长时记忆（<b>新突触建立</b>）→ 永久记忆", "情绪：消极情绪长期不缓解 → 抑郁；可调节、可治疗"], "trap": "四个言语区的“症”名要与字母对应：S→不能说，H→听不懂，V→看不懂，W→不能写。"}};
+
+const BKEY="bio-srs-v1"; let bprog={};
+try{ bprog=JSON.parse(localStorage.getItem(BKEY)||"{}")||{}; }catch(e){ bprog={}; }
+function bsave(){ try{ localStorage.setItem(BKEY, JSON.stringify(bprog)); }catch(e){} }
+const INTERVALS=[1,3,7,14,30,60];
+const today=()=>Math.floor(Date.now()/86400000);
+function brec(c){ return bprog[c.id] || {box:0,due:0,seen:0,lapses:0}; }
+function bdue(c){ const r=brec(c); return r.seen>0 && r.due<=today(); }
+function bmastered(c){ const r=brec(c); return r.seen>0 && r.box>=4; }   // 间隔已到 14 天以上
+function bnew(c){ return brec(c).seen===0; }
+function brate(c, grade){ // 1 不会 2 模糊 3 会
+  const r=brec(c); r.seen++;
+  if(grade===3){ r.box=Math.min(r.box+1, INTERVALS.length); r.due=today()+INTERVALS[r.box-1]; }
+  else if(grade===2){ r.box=Math.max(r.box,1); r.due=today()+1; }
+  else { r.box=0; r.due=today(); r.lapses++; }
+  r.last=grade; bprog[c.id]=r; bsave();
+}
+
+function secChips(container,name){
+  container.innerHTML="";
+  SEC_ORDER.forEach(k=>{
+    const n=BIO.filter(c=>c.sec===k).length;
+    const l=document.createElement("label"); l.className="chip";
+    l.innerHTML=`<input type="checkbox" name="${name}" value="${k}" checked> ${k} <span class="n">${SEC[k]} · ${n}</span>`;
+    container.appendChild(l);
+  });
+}
+const bsel=name=>new Set([...document.querySelectorAll(`input[name=${name}]:checked`)].map(i=>i.value));
+secChips($("#secChips"),"bs"); secChips($("#outlineChips"),"os");
+$("#secChips").addEventListener("change", bRangeStats);
+$("#bMode").addEventListener("change", bRangeStats);
+function bRangeStats(){
+  const secs=bsel("bs"); const all=BIO.filter(c=>secs.has(c.sec));
+  const due=all.filter(bdue).length, nw=all.filter(bnew).length, m=all.filter(bmastered).length;
+  $("#bRangeStats").innerHTML=`
+    <div class="stat"><b>${all.length}</b><span>范围内问答卡</span></div>
+    <div class="stat warn"><b>${due}</b><span>今天到期要复习</span></div>
+    <div class="stat"><b>${nw}</b><span>还没学过的新卡</span></div>
+    <div class="stat good"><b>${m}</b><span>已掌握</span></div>`;
+  $("#bStart").disabled = buildQueue().length===0;
+}
+function buildQueue(){
+  const secs=bsel("bs"); const all=BIO.filter(c=>secs.has(c.sec)); const mode=$("#bMode").value;
+  if(mode==="all") return shuffle(all);
+  if(mode==="weak") return shuffle(all.filter(c=>!bmastered(c)));
+  const due=shuffle(all.filter(bdue)), nw=all.filter(bnew).slice(0, +$("#bNew").value);  // 新卡按课本顺序
+  return due.concat(nw);
+}
+bRangeStats();
+
+let bs=null;
+$("#bStart").addEventListener("click",()=>{
+  const q=buildQueue(); if(!q.length) return;
+  bs={queue:q, i:0, revealed:false, grades:{1:0,2:0,3:0}, again:[], done:0, total:q.length};
+  $("#bSetup").hidden=true; $("#bSummary").hidden=true; $("#bQuiz").hidden=false; bRender();
+});
+$("#bQuit").addEventListener("click", bFinish);
+function bRender(){
+  const c=bs.queue[bs.i];
+  $("#bPos").textContent=`${bs.done+1} / ${bs.total}${bs.again.length?`（+${bs.again.length} 张待重做）`:""}`;
+  $("#bScore").textContent=`会 ${bs.grades[3]} · 模糊 ${bs.grades[2]} · 不会 ${bs.grades[1]}`;
+  $("#bBar").style.width=(bs.done/bs.total*100)+"%";
+  const r=brec(c);
+  $("#bCard").innerHTML=`
+    <div class="meta"><span class="tag u">${c.sec} ${SEC[c.sec]}</span> ${r.seen===0?'<span class="tag">新卡</span>':`<span class="tag" style="background:var(--surface2);color:var(--muted)">第 ${r.seen+1} 次</span>`}</div>
+    <div class="q">${c.q}</div>
+    ${bs.revealed?`<div class="a">${c.a}</div>`:""}`;
+  $("#bActions").innerHTML = bs.revealed
+    ? `<button class="btn big bad" data-g="1">不会 <span class="kbd">1</span></button><button class="btn big mid" data-g="2">模糊 <span class="kbd">2</span></button><button class="btn big ok" data-g="3">会 <span class="kbd">3</span></button>`
+    : `<button class="btn big primary" id="bReveal">想好了，看答案 <span class="kbd">空格</span></button>`;
+  if(bs.revealed) document.querySelectorAll("#bActions [data-g]").forEach(b=>b.onclick=()=>bAnswer(+b.dataset.g));
+  else $("#bReveal").onclick=bReveal;
+}
+function bReveal(){ if(!bs||bs.revealed) return; bs.revealed=true; bRender(); }
+function bAnswer(g){
+  if(!bs||!bs.revealed) return;
+  const c=bs.queue[bs.i]; brate(c,g); bs.grades[g]++;
+  if(g===1) bs.again.push(c); else bs.done++;
+  bs.i++; bs.revealed=false;
+  if(bs.i>=bs.queue.length){
+    if(bs.again.length){ bs.queue=bs.queue.concat(shuffle(bs.again)); bs.again=[]; bRender(); }
+    else bFinish();
+  } else bRender();
+}
+function bFinish(){
+  if(!bs) return;
+  const g=bs.grades, n=g[1]+g[2]+g[3];
+  $("#bQuiz").hidden=true; $("#bSetup").hidden=false; $("#bSummary").hidden=false;
+  const hard=bs.queue.filter(c=>brec(c).last===1 || (brec(c).lapses>0 && brec(c).box<2));
+  const uniq=[...new Map(hard.map(c=>[c.id,c])).values()];
+  $("#bSummary").innerHTML=`<h2>本轮结果</h2>
+    <div class="stats">
+      <div class="stat"><b>${n}</b><span>作答次数</span></div>
+      <div class="stat good"><b>${g[3]}</b><span>会</span></div>
+      <div class="stat"><b>${g[2]}</b><span>模糊（明天再来）</span></div>
+      <div class="stat warn"><b>${g[1]}</b><span>不会（已重做）</span></div>
+    </div>
+    ${uniq.length?`<p class="note">这轮卡壳过的知识点，建议回“知识框架”看一眼对应的节：</p><div class="result-list">${uniq.map(c=>`<div><b style="font-family:var(--sans);font-size:14px">${c.sec}</b>${c.q}</div>`).join("")}</div>`:`<p class="note">这一轮全部答出来了，按记忆曲线过几天再来复习一次。</p>`}`;
+  bs=null; bRangeStats(); $("#bSummary").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+// 知识框架
+$("#outlineChips").addEventListener("change", renderOutline);
+function renderOutline(){
+  const secs=bsel("os");
+  $("#outline").innerHTML=SEC_ORDER.filter(k=>secs.has(k)).map(k=>`<h3>${k} ${SEC[k]}</h3><ul>${OUTLINE[k].pts.map(p=>`<li>${p}</li>`).join("")}</ul><div class="trap"><b>易错：</b>${OUTLINE[k].trap}</div>`).join("") || `<div class="empty">选择至少一节</div>`;
+}
+renderOutline();
+
+// 掌握情况
+function renderBStats(){
+  const m=BIO.filter(bmastered).length, nw=BIO.filter(bnew).length, due=BIO.filter(bdue).length;
+  $("#bTotals").innerHTML=`
+    <div class="stat"><b>${BIO.length}</b><span>问答卡总数</span></div>
+    <div class="stat good"><b>${m}</b><span>已掌握</span></div>
+    <div class="stat"><b>${BIO.length-m-nw}</b><span>学习中</span></div>
+    <div class="stat"><b>${nw}</b><span>未学</span></div>
+    <div class="stat warn"><b>${due}</b><span>今天到期</span></div>`;
+  let html=`<tr><th>节</th><th>总数</th><th>未学</th><th>学习中</th><th>已掌握</th><th>今天到期</th><th>掌握率</th></tr>`;
+  SEC_ORDER.forEach(k=>{const cs=BIO.filter(c=>c.sec===k); const mm=cs.filter(bmastered).length, nn=cs.filter(bnew).length;
+    html+=`<tr><td>${k} ${SEC[k]}</td><td>${cs.length}</td><td>${nn}</td><td>${cs.length-mm-nn}</td><td>${mm}</td><td>${cs.filter(bdue).length}</td><td><div class="bar" style="margin:0;width:90px"><i style="width:${cs.length?mm/cs.length*100:0}%"></i></div></td></tr>`;});
+  $("#bStatTable").innerHTML=html;
+}
+$("#bReset").addEventListener("click",()=>{
+  const b=$("#bReset");
+  if(b.dataset.arm!=="1"){ b.dataset.arm="1"; b.textContent="再点一次确认清空"; b.classList.add("bad"); setTimeout(()=>{b.dataset.arm="";b.textContent="清空生物复习记录";b.classList.remove("bad");},3000); return; }
+  bprog={}; bsave(); b.dataset.arm=""; b.textContent="清空生物复习记录"; b.classList.remove("bad"); renderBStats(); bRangeStats();
+});
+
+// 生物标签页
+document.querySelectorAll("#bioTabs button").forEach(b=>b.addEventListener("click",()=>showBTab(b.dataset.btab)));
+function showBTab(t){
+  document.querySelectorAll("#bioTabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.btab===t));
+  ["cards","outline","stats"].forEach(x=>$("#btab-"+x).hidden = x!==t);
+  if(t==="stats") renderBStats(); if(t==="cards") bRangeStats();
+  try{ localStorage.setItem(BKEY+"-tab", t); }catch(e){}
+}
+
+// 科目切换
+let SUBJ="en";
+document.querySelectorAll(".subject button").forEach(b=>b.addEventListener("click",()=>showSubject(b.dataset.subj)));
+function showSubject(sj){
+  SUBJ=sj;
+  document.querySelectorAll(".subject button").forEach(b=>b.setAttribute("aria-selected", b.dataset.subj===sj));
+  $("#subj-en").hidden = sj!=="en"; $("#hdr-en").hidden = sj!=="en";
+  $("#subj-bio").hidden = sj!=="bio"; $("#hdr-bio").hidden = sj!=="bio";
+  if(sj==="bio"){ const due=BIO.filter(bdue).length; $("#subjNote").textContent = due?`生物今天有 ${due} 张卡到期`:""; bRangeStats(); }
+  else $("#subjNote").textContent="";
+  try{ localStorage.setItem("subject", sj); }catch(e){}
+}
+document.addEventListener("keydown",e=>{
+  if(SUBJ!=="bio" || e.target.matches("input,select,textarea")) return;
+  if(!bs){ if(e.key==="Enter" && !$("#btab-cards").hidden && !$("#bStart").disabled){ e.preventDefault(); $("#bStart").click(); } return; }
+  if(e.key===" "||e.key==="Enter"){ e.preventDefault(); if(!bs.revealed) bReveal(); }
+  else if(["1","2","3"].includes(e.key)){ e.preventDefault(); bAnswer(+e.key); }
+});
+try{ const t=localStorage.getItem(BKEY+"-tab"); if(t) showBTab(t); const sj=localStorage.getItem("subject"); if(sj) showSubject(sj); }catch(e){}
 
 // 恢复上次标签页
 try{ const t=localStorage.getItem(KEY+"-tab"); if(t) showTab(t); }catch(e){}
